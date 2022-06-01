@@ -8,8 +8,7 @@ COPY . /home/node
 
 RUN npm ci \
     && npm run build \
-    && npm prune --production \
-    && npm i rxjs@^7               
+    && npm prune --production             
 
 # ---
 
