@@ -1,4 +1,4 @@
-FROM node:18.1-alpine as builder
+FROM node:14.0-alpine as builder
 
 ENV NODE_ENV build
 
@@ -6,13 +6,13 @@ WORKDIR /home/node
 
 COPY . /home/node
 
-RUN npm ci \
+RUN npm install --legacy-peer-deps \
     && npm run build \
     && npm prune --production             
 
 # ---
 
-FROM node:18.1-alpine
+FROM node:14.0-alpine
 
 ENV NODE_ENV production
 
