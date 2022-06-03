@@ -1,3 +1,8 @@
+export class progressmarker {
+    name: string; 
+    complete: boolean; 
+}
+
 export class CreateGoalDto {
     name: string; 
     deadline: number; 
@@ -6,4 +11,6 @@ export class CreateGoalDto {
     priority?: number; 
     reminders?: boolean; 
     media?: string[]; 
+    starttime?: number; 
+    progressmarkers?: Array<progressmarker>;
 }

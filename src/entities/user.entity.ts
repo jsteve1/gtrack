@@ -11,15 +11,25 @@ export class User {
   @Column()
   lname: string;
 
+  @Column({ unique: true })
+  email: string;
+
   @Column()
   pw: string;
 
   @Column()
-  sessionid: string;
+  refreshToken: string;
 
   @Column()
   mainpic: string;
 
-  @Column({ default: true })
-  isActive: boolean;
+  @Column({ type: "simple-array" })
+  pics: string[];
+
+  @Column()
+  private: boolean; 
+
+  @Column()
+  bio: string; 
+  
 }

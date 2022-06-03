@@ -1,4 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { progressmarker } from './dto/goalDto';
 
 @Entity()
 export class Goal {
@@ -21,7 +22,7 @@ export class Goal {
   postponed: boolean; 
 
   @Column()
-  private: boolean;
+  viewable: boolean;
 
   @Column()
   reminders: boolean;
@@ -38,7 +39,10 @@ export class Goal {
   @Column()
   userid: string; 
 
-  @Column({ type: "simple-json" })
-  progressmarkers: {};
+  @Column({ type: "simple-array" })
+  progressmarkers: Array<progressmarker>;
+
+  @Column()
+  priority: number; 
 
 }

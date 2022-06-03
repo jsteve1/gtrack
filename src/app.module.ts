@@ -1,16 +1,20 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { GoalsModule } from './goals/goals.module';
 import { UserModule } from './user/user.module';
-import { Goals } from './goals';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import 'dotenv/config'; 
 import { Goal } from './entities/goal.entity';
 import { User } from './entities/user.entity';
-console.log(`${process.env.DATABASE_URL}`, `${process.env.DB_USER}`,`${process.env.DB_PASS}`)
+import { SignOnModule } from './signon/signon.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+
+import 'dotenv/config'; 
+import { join } from 'path';
 @Module({
   imports: [GoalsModule, UserModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'client'),
+      exclude: ['/api*'],
+    }),
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: `${process.env.DATABASE_URL}`,
@@ -20,9 +24,10 @@ console.log(`${process.env.DATABASE_URL}`, `${process.env.DB_USER}`,`${process.e
       database: `${process.env.DB_NAME}`,
       entities: [User, Goal],
       synchronize: true,
-    })
+    }),
+    SignOnModule
   ],
-  controllers: [AppController],
-  providers: [AppService, Goals, User],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}
