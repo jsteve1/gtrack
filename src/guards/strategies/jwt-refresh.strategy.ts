@@ -9,8 +9,7 @@
  import { Injectable, Logger } from '@nestjs/common';
  import { Request } from 'express';
  import { UserService } from '../../user/user.service';
-  
- @Injectable()
+   @Injectable()
  export class JwtRefreshStrategy extends PassportStrategy(
    Strategy,
    'jwt'
