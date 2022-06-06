@@ -5,7 +5,10 @@ import { User } from "../entities/user.entity";
 import * as bcrypt from 'bcrypt';
 import { OnModuleDestroy } from "@nestjs/common";
 import { SignOnService } from "../signon/signon.service";
-import { CreateUserDto } from "../entities/dto/userDto";
+import { CreateUserDto, UpdateUserDto } from "../entities/dto/userDto";
+import { Goal } from "../entities/goal.entity";
+import { ProgressMarker } from "../entities/progressmarker.entity";
+import { GoalService } from "../goals/goal.service";
 
 @Injectable()
 export class UserService implements OnModuleDestroy {
@@ -14,6 +17,8 @@ export class UserService implements OnModuleDestroy {
         private userRepository: Repository<User>,
         @Inject(forwardRef(() => SignOnService))
         private signOnService: SignOnService,
+        @Inject(forwardRef(() => GoalService))
+        private goalService: GoalService
     ) {}
 
     async onModuleDestroy(): Promise<void> {
@@ -24,16 +29,16 @@ export class UserService implements OnModuleDestroy {
         if(await this.checkUserExists(userDto.email)) {
             return null;
         }
-        const user = new User();
+        let user = new User();
         user.email = userDto.email;
         user.fname = userDto.fname; 
         user.lname = userDto.lname;
         user.private = userDto.private || false; 
         user.bio = userDto.bio || '';
         user.pw = await bcrypt.hash(userDto.pw, 10);
+        user = await this.userRepository.save(user);
         const token = await this.signOnService.newRefreshToken(user);
         user.refreshToken = await bcrypt.hash(token, 10);
-        await this.userRepository.save(user);
         return { user: user, token: token };
     }
     async checkUserExists(email: string): Promise<Boolean> {
@@ -69,5 +74,19 @@ export class UserService implements OnModuleDestroy {
         const user = await this.userRepository.findOne(id); 
         user.refreshToken = await bcrypt.hash(token, 10);
         return this.userRepository.save(user);
+    }
+    async updateUserProfile(id: string, updateObj: UpdateUserDto): Promise<User> {
+        const user = await this.userRepository.findOne(id); 
+        for(let key in updateObj) {
+            if(user[key]) {
+                user[key] = updateObj[key]; 
+            }
+        }
+        return this.userRepository.save(user); 
+    }
+    async getUserProfile(id: string): Promise<{ user: User, goals: Array<Goal>, progressMarkers: Array<ProgressMarker>}> {
+        const user = await this.userRepository.findOne(id); 
+        const { goals, progressMarkers } = await this.goalService.getGoals(user.id); 
+        return { user: user, goals: goals, progressMarkers: progressMarkers }; 
     }
 }

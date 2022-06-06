@@ -16,7 +16,6 @@ export class SignonController {
   private readonly logger = new Logger(SignonController.name);
 
   @UseGuards(SignOnAuthGuard)
-  @Header("Access-Control-Allow-Credentials", "true")
   @Post('login')
   async login(@Req() req, @Res({ passthrough: true }) res: Response) {
     this.logger.log(`Logging in user and dishing out new JWT ${req.user.email}`);

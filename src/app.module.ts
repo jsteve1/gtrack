@@ -4,9 +4,9 @@ import { UserModule } from './user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Goal } from './entities/goal.entity';
 import { User } from './entities/user.entity';
+import { ProgressMarker } from './entities/progressmarker.entity';
 import { SignOnModule } from './signon/signon.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
-
 import 'dotenv/config'; 
 import { join } from 'path';
 @Module({
@@ -22,7 +22,7 @@ import { join } from 'path';
       username: `${process.env.DB_USER}`,
       password: `${process.env.DB_PASS}`,
       database: `${process.env.DB_NAME}`,
-      entities: [User, Goal],
+      entities: [User, Goal, ProgressMarker],
       synchronize: true,
     }),
     SignOnModule

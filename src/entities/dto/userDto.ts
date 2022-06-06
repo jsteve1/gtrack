@@ -5,6 +5,15 @@ export class CreateUserDto {
     pw: string;
     private: boolean; 
     media?: string[]; 
-    mainpic?: number; 
+    mainpic?: string; 
+    bio?: string; 
+}
+
+export class UpdateUserDto {
+    fname?: string; 
+    lname?: string; 
+    private?: boolean; 
+    media?: string[]; 
+    mainpic?: string;
     bio?: string; 
 }

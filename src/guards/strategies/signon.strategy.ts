@@ -7,7 +7,7 @@
  export class SignOnStrategy extends PassportStrategy(Strategy, "signon") {
    constructor(private signonService: SignOnService) {
      super({
-       usernameField: 'userName'
+       usernameField: 'email'
      });
    }
    /**

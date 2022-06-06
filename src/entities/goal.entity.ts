@@ -39,9 +39,6 @@ export class Goal {
   @Column()
   userid: string; 
 
-  @Column({ type: "simple-array" })
-  progressmarkers: Array<progressmarker>;
-
   @Column()
   priority: number; 
 

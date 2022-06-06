@@ -3,7 +3,7 @@
 */
 
 import { Controller, Post, Body, UseGuards, Req, Put, Get, Delete, Logger, Param, Res, Header, Query, Inject, forwardRef } from '@nestjs/common';
-import { CreateUserDto } from '../entities/dto/userDto';
+import { CreateUserDto, UpdateUserDto } from '../entities/dto/userDto';
 import JwtRefreshAuthGuard from '../guards/jwt-refresh.auth-guard';
 import { User } from '../entities/user.entity';
 import { UserService } from '../user/user.service';
@@ -20,15 +20,15 @@ export class UserController {
   @Get(':id')
   @UseGuards(JwtRefreshAuthGuard)
   async getUser(@Req() req: any, @Param('id') userId: string): Promise<User> {
-      this.logger.log(`Fetching user ${userId}`);
+      this.logger.log(`Attemping to fetch user ${userId}`);
       if(!req.user) return null; 
       if(req.user?.id === userId) return req.user; 
+      else {
+        this.logger.log(`Error while fetching user with ID: ${userId}, auth mismatch`);
+        return null;
+      }
   }
 
-  /**
-   * Creates a new user with a username, necessary details and a user-stats entity, returns it... or returns null if failed
-   * @param req for the req.user object 
-   */
   @Post('create')
   @UseGuards(NewUserAuthGuard)
   async createUser(@Res() res: Response, @Body() newUser: CreateUserDto) {
@@ -46,6 +46,14 @@ export class UserController {
       return res.send(result.user); 
     }
 
+  @Put('update')
+  @UseGuards(JwtRefreshAuthGuard)
+  async updateUser(@Req() req: any, @Res() res, @Body() updateUserObj: UpdateUserDto): Promise<User> {
+      this.logger.log(`Updating user  ${req.user.id}`); 
+      return this.userService.updateUserProfile(req.user.id, updateUserObj); 
+  }
+
+
   @Delete(':id')
   @UseGuards(JwtRefreshAuthGuard)
   async deleteUser(@Req() req, @Param('id') userId: string): Promise<void> {
@@ -54,4 +62,6 @@ export class UserController {
     this.logger.log(`Admin request for delete issued for user with ID: ${userId}`);
     return this.userService.remove(userId);
   }
+
+  
 }
