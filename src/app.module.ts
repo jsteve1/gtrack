@@ -10,6 +10,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import 'dotenv/config'; 
 import { join } from 'path';
 import { UploadModule } from './uploads/upload.module';
+import { MediaUpload } from './entities/media-upload.entity';
 
 @Module({
   imports: [GoalsModule, UserModule,
@@ -24,7 +25,7 @@ import { UploadModule } from './uploads/upload.module';
       username: `${process.env.DB_USER}`,
       password: `${process.env.DB_PASS}`,
       database: `${process.env.DB_NAME}`,
-      entities: [User, Goal, ProgressMarker],
+      entities: [User, Goal, ProgressMarker, MediaUpload],
       synchronize: true,
     }),
     SignOnModule,

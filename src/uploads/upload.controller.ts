@@ -4,11 +4,10 @@ import { Post } from "@nestjs/common";
 import { Controller } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { UserService } from "../user/user.service";
-import { MediaUpload, UploadType } from "../entities/media-upload.entity";
+import { UploadType } from "../entities/media-upload.entity";
 import JwtRefreshAuthGuard from "../guards/jwt-refresh.auth-guard";
 import { UploadService } from "./upload-file.service";
 import { GoalService } from "src/goals/goal.service";
-import { idText } from "typescript";
 
 @Controller('upload')
 export class UploadController {
@@ -54,7 +53,6 @@ export class UploadController {
     async deleteUpload(@Req() req, @Param('id') uploadId: string) {
         this.logger.log(`Deleting media for user ${req.user.email}, upload ${uploadId}`);
         await this.uploadService.rmUpload(req.user.id, uploadId);
-
         return "Success";  
     }
 }
