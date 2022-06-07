@@ -124,4 +124,16 @@ export class GoalService {
     async removeProgressMarker(markerId: string) {
       this.progressMarkerRepo.delete(markerId); 
     }
+    async addMedia(id: string, path: string): Promise<Goal> {
+      const goal = await this.goalRepo.findOne(id); 
+      goal.media.push(path); 
+      return this.goalRepo.save(goal); 
+    }
+    async rmMedia(id: string, path: string): Promise<Goal> {
+        const goal = await this.goalRepo.findOne(id); 
+        goal.media = goal.media.filter(pic => 
+            pic !== path 
+        );
+        return this.goalRepo.save(goal); 
+    }
 }

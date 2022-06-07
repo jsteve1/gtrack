@@ -84,6 +84,18 @@ export class UserService implements OnModuleDestroy {
         }
         return this.userRepository.save(user); 
     }
+    async addMedia(id: string, path: string): Promise<User> {
+        const user = await this.userRepository.findOne(id); 
+        user.pics.push(path); 
+        return this.userRepository.save(user); 
+    }
+    async rmMedia(id: string, path: string): Promise<User> {
+        const user = await this.userRepository.findOne(id); 
+        user.pics = user.pics.filter(pic => 
+            pic !== path 
+        );
+        return this.userRepository.save(user); 
+    }
     async getUserProfile(id: string): Promise<{ user: User, goals: Array<Goal>, progressMarkers: Array<ProgressMarker>}> {
         const user = await this.userRepository.findOne(id); 
         const { goals, progressMarkers } = await this.goalService.getGoals(user.id); 

@@ -9,6 +9,7 @@ import { SignOnModule } from './signon/signon.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import 'dotenv/config'; 
 import { join } from 'path';
+import { UploadModule } from './uploads/upload.module';
 
 @Module({
   imports: [GoalsModule, UserModule,
@@ -26,7 +27,8 @@ import { join } from 'path';
       entities: [User, Goal, ProgressMarker],
       synchronize: true,
     }),
-    SignOnModule
+    SignOnModule,
+    UploadModule
   ],
   controllers: [],
   providers: [],
