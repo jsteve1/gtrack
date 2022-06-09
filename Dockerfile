@@ -1,4 +1,4 @@
-FROM node:14.0-alpine as builder
+FROM node:14.0 as builder
 
 ENV NODE_ENV build
 
@@ -12,7 +12,7 @@ RUN npm i --legacy-per-deps \
 
 # ---
 
-FROM node:14.0-alpine
+FROM node:14.0
 
 ENV NODE_ENV production
 
