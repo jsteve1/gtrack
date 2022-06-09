@@ -51,9 +51,10 @@ export class UploadController {
         return { upload: upload, goal: _goal }; 
     }
     @Delete(':id')
+    @UseGuards(JwtRefreshAuthGuard)
     async deleteUpload(@Req() req, @Param('id') uploadId: string) {
         this.logger.log(`Deleting media for user ${req.user.email}, upload ${uploadId}`);
         await this.uploadService.rmUpload(req.user.id, uploadId);
-        return "Success";  
+        return "Successfully removed upload " + uploadId;  
     }
 }

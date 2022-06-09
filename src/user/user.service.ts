@@ -100,6 +100,10 @@ export class UserService implements OnModuleDestroy {
     }
     async rmMedia(id: string, path: string): Promise<User> {
         const user = await this.userRepository.findOne(id); 
+        if(user.mainpic === path) { user.mainpic = "" }; 
+        if(!user.pics.some(pic => pic === user.mainpic)) {
+            user.mainpic = "";
+        }
         user.pics = user.pics.filter(pic => 
             pic !== path 
         );

@@ -127,11 +127,20 @@ export class GoalService {
     }
     async addMedia(id: string, path: string): Promise<Goal> {
       const goal = await this.goalRepo.findOne(id); 
-      goal.media.push(path); 
-      return this.goalRepo.save(goal); 
+      if(goal.media.some(pic => pic === path)) {
+        goal.media = goal.media.filter(pic => pic !== path); 
+        goal.media.push(path); 
+        return this.goalRepo.save(goal); 
+      } else {
+        goal.media.push(path); 
+        return this.goalRepo.save(goal); 
+      }
     }
     async rmMedia(id: string, path: string): Promise<Goal> {
-        const goal = await this.goalRepo.findOne(id); 
+      const goal = await this.goalRepo.findOne(id); 
+        if(!goal.media.some(pic => pic === goal.mediacomplete)) {
+            goal.mediacomplete = "";
+        }
         goal.media = goal.media.filter(pic => 
             pic !== path 
         );

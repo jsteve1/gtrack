@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable } from "@nestjs/common";
+import { forwardRef, Inject, Injectable, Logger } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { MediaUpload, UploadType } from "../entities/media-upload.entity";
 import { Repository } from "typeorm";
@@ -21,7 +21,7 @@ export class UploadService {
         @Inject(forwardRef(() => GoalService))
         private goalService: GoalService,
         ) {}
-
+    private readonly logger = new Logger(UploadService.name);
     async create(path: string, uploadType: UploadType, desc: string, userId: string): Promise<MediaUpload> {
         const upload = new MediaUpload()
         upload.path = path; 
@@ -99,14 +99,19 @@ export class UploadService {
         if(!user) return false; 
         const upload = await this.uploadRepo.findOne(uploadId);
         if(!upload) return false; 
-        if(upload.uploadType === UploadType.Goal) {
-            await this.goalService.rmMedia(upload.entityId, upload.path); 
+        await this.uploadRepo.delete(uploadId);     
+        try {
+            if(upload.uploadType === UploadType.Goal) {
+                await this.goalService.rmMedia(upload.entityId, upload.path); 
+            }
+            if(upload.uploadType === UploadType.ProfilePic) {
+                await this.userService.rmMedia(upload.entityId, upload.path); 
+            }
+            await unlink(upload.path); 
+        } catch(err) {
+            this.logger.log(`File with id ${uploadId} not found, removing from database`);
+            return true;
         }
-        if(upload.uploadType === UploadType.ProfilePic) {
-            await this.userService.rmMedia(upload.entityId, upload.path); 
-        }
-        await unlink(upload.path); 
-        await this.uploadRepo.delete(uploadId);      
         return true;
     }
 
