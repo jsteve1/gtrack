@@ -69,7 +69,7 @@ export class GoalController {
   @Delete(':id')
   @UseGuards(JwtRefreshAuthGuard)
   async deleteGoal(@Req() req, @Param('id') goalId: string): Promise<void> {
-    this.logger.log(`Remove goal by user ${req.user.userName}`);
+    this.logger.log(`Remove goal by user ${req.user.id}`);
     return this.goalService.remove(goalId);
   }
 }

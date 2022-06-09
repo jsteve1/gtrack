@@ -49,8 +49,9 @@ export class GoalService {
     async update(goalId: string, updateObj: UpdateGoalDto): Promise<Goal> {
       const goal = await this.goalRepo.findOne(goalId); 
       if(!goal) return null; 
+
       for(let key in updateObj) {
-        if(goal[key]) {
+        if(goal[key] !== undefined) {
           goal[key] = updateObj[key]; 
         }
       }
@@ -60,10 +61,10 @@ export class GoalService {
     async getGoals(userId: string): Promise<{ goals: Goal[], progressMarkers: Array<ProgressMarker>}> {
       const _progressMarkers = [];  
       const goals = await this.goalRepo.find({ userid: userId }); 
-      goals.map(async (goal) => {
+      for(let goal of goals) {
         const progressMarkers = await this.progressMarkerRepo.find({ where: { goalid: goal.id }}); 
         _progressMarkers.push(...[progressMarkers]);
-      })
+      }
       const _goals = goals.sort((a, b) => {
         if(a.priority > b.priority) {
           return 1; 

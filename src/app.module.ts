@@ -11,12 +11,16 @@ import 'dotenv/config';
 import { join } from 'path';
 import { UploadModule } from './uploads/upload.module';
 import { MediaUpload } from './entities/media-upload.entity';
+import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
   imports: [GoalsModule, UserModule,
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'client'),
       exclude: ['/api*'],
+    }),
+    MulterModule.register({
+      dest: './tmp',
     }),
     TypeOrmModule.forRoot({
       type: 'mysql',

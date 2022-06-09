@@ -6,11 +6,11 @@ import { User } from "../entities/user.entity";
 import { Goal } from "../entities/goal.entity";
 import { open, stat, readFile, FileHandle, access, mkdir, writeFile, unlink } from 'fs/promises';
 import path, { extname } from "path";
-import { uuid } from "uuidv4";
+import { v4 } from "uuid";
 import { UserService } from "../user/user.service";
 import { GoalService } from "../goals/goal.service";
-import { ProgressMarker } from "src/entities/progressmarker.entity";
-
+import { ProgressMarker } from "../entities/progressmarker.entity";
+import fs from 'fs';
 @Injectable()
 export class UploadService {
     constructor(
@@ -62,20 +62,20 @@ export class UploadService {
 
     public async newUpload(userId: string, uploadType: UploadType, file: Express.Multer.File, goalId?: string): Promise<MediaUpload> {
         const upload = new MediaUpload(),
-            tempFilePath = path.resolve(`./tmp/${file.filename}`),
-            ext = extname(`${file.filename}`),
-            uploadFileName = `upload-${uuid()}${ext}`,     
-            userDirPath = `./uploads/${userId}/`,
+            tempFilePath = path.resolve(`./tmp/${file.originalname}`),
+            ext = extname(`${file.originalname}`),
+            uploadFileName = `upload-${v4()}${ext}`,     
+            userDirPath = `uploads/${userId}/`,
             fullPath = userDirPath + uploadFileName,
             tempFd = await open(tempFilePath, 'r');
 
         if(!tempFd){ console.log('Cannot find temp file upload, failing new upload.'); return null; } 
         const tempFile = await tempFd.readFile({ encoding: 'base64' }); 
         if(!tempFile){ console.log("Critical fs error, failing new upload"); return null; }
-        if(!(await stat(userDirPath))) await mkdir(userDirPath, { recursive: true });
+        if(!(fs.existsSync(userDirPath))) await mkdir(userDirPath, { recursive: true });
         try {
             await writeFile(fullPath, tempFile, { encoding: 'base64' });
-            await unlink(tempFile); 
+            await unlink(tempFilePath); 
             upload.uploadType = uploadType; 
             upload.path = fullPath; 
             upload.userid = userId;

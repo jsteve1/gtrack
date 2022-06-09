@@ -77,6 +77,9 @@ export class UserService implements OnModuleDestroy {
     }
     async updateUserProfile(id: string, updateObj: UpdateUserDto): Promise<User> {
         const user = await this.userRepository.findOne(id); 
+        if(updateObj.mainpic) {
+            user.mainpic = updateObj.mainpic;
+        }
         for(let key in updateObj) {
             if(user[key]) {
                 user[key] = updateObj[key]; 
@@ -86,8 +89,14 @@ export class UserService implements OnModuleDestroy {
     }
     async addMedia(id: string, path: string): Promise<User> {
         const user = await this.userRepository.findOne(id); 
-        user.pics.push(path); 
-        return this.userRepository.save(user); 
+        if(user.pics.some(pic => pic === path)) {
+            user.pics = user.pics.filter(pic => pic !== path);
+            user.pics.push(path);
+            return this.userRepository.save(user); 
+        } else {
+            user.pics.push(path); 
+            return this.userRepository.save(user); 
+        }
     }
     async rmMedia(id: string, path: string): Promise<User> {
         const user = await this.userRepository.findOne(id); 

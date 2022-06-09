@@ -48,9 +48,12 @@ export class UserController {
 
   @Put('update')
   @UseGuards(JwtRefreshAuthGuard)
-  async updateUser(@Req() req: any, @Res() res, @Body() updateUserObj: UpdateUserDto): Promise<User> {
+  async updateUser(@Req() req: any, @Body() updateUserObj: UpdateUserDto): Promise<User> {
       this.logger.log(`Updating user  ${req.user.id}`); 
-      return this.userService.updateUserProfile(req.user.id, updateUserObj); 
+      const user = await this.userService.updateUserProfile(req.user.id, updateUserObj); 
+      delete user.pw; 
+      delete user.refreshToken;
+      return user;
   }
 
 

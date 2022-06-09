@@ -8,6 +8,7 @@ import { UploadType } from "../entities/media-upload.entity";
 import JwtRefreshAuthGuard from "../guards/jwt-refresh.auth-guard";
 import { UploadService } from "./upload-file.service";
 import { GoalService } from "src/goals/goal.service";
+import { storage, limits, fileFilter } from "../config/uploads.config";
 
 @Controller('upload')
 export class UploadController {
@@ -21,7 +22,7 @@ export class UploadController {
 
     private readonly logger = new Logger(UploadController.name);
     @Post('profile')
-    @UseInterceptors(FileInterceptor('file'))
+    @UseInterceptors(FileInterceptor('file', { storage: storage, limits: limits, fileFilter: fileFilter }))
     @UseGuards(JwtRefreshAuthGuard)
     async uploadProfilePicMedia(@Req() req, @UploadedFile() file: Express.Multer.File) {
         this.logger.log(`Uploading new profile media for user ${req.user.email}, filename ${file.filename}`);
@@ -35,7 +36,7 @@ export class UploadController {
         return { upload: upload, user: _user }; 
     }
     @Post('goal/:id')
-    @UseInterceptors(FileInterceptor('file'))
+    @UseInterceptors(FileInterceptor('file', { storage: storage, limits: limits, fileFilter: fileFilter }))
     @UseGuards(JwtRefreshAuthGuard)
     async uploadGoalPicMedia(@Req() req, @Param('id') id, @UploadedFile() file: Express.Multer.File) {
         this.logger.log(`Uploading new goal media for user ${req.user.email}, filename ${file.filename}`);

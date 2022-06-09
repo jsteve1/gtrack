@@ -13,7 +13,7 @@ export class UpdateUserDto {
     fname?: string; 
     lname?: string; 
     private?: boolean; 
-    media?: string[]; 
+    pics?: string[]; 
     mainpic?: string;
     bio?: string; 
 }
