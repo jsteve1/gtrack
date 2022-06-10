@@ -39,7 +39,7 @@
      const refreshToken = request.cookies?.Refresh;
      const user = await this.userService.checkStoredHashToken(payload.username, refreshToken);
      if(!user){ 
-       this.logger.log("JWT validation failed, unauthorized access to api");
+       this.logger.error("Error: JWT validation failed, unauthorized access to api");
        return false;
      }
      delete user.pw; 

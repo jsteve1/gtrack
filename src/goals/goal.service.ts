@@ -99,12 +99,13 @@ export class GoalService {
         }
         return this.goalRepo.save(goal); 
     }
-    async remove(goalId: string): Promise<void> {
+    async remove(goalId: string): Promise<string> {
       const progressMarkers = await this.progressMarkerRepo.find({ where: { goalid: goalId }}); 
       for(let prgmrk of progressMarkers) {
         this.progressMarkerRepo.delete(prgmrk.id);
       }
       this.goalRepo.delete(goalId);
+      return `Successfully removed goal ${goalId}`;
     }
     async addProgressMarker(goalId: string, createProg: any): Promise<ProgressMarker> {
       const goal = await this.goalRepo.findOne(goalId); 

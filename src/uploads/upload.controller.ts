@@ -28,7 +28,7 @@ export class UploadController {
         this.logger.log(`Uploading new profile media for user ${req.user.email}, filename ${file.filename}`);
         const user = await this.userService.findOne(req.user?.id);
         if(!user) {
-            this.logger.log(`Unable to upload file; cannot find user ${req.user.id}`);
+            this.logger.error(`Error: Unable to upload file; cannot find user ${req.user.id}`);
             return false; 
         }
         const upload = await this.uploadService.newUpload(user.id, UploadType.ProfilePic, file);
@@ -42,7 +42,7 @@ export class UploadController {
         this.logger.log(`Uploading new goal media for user ${req.user.email}, filename ${file.filename}`);
         const user = await this.userService.findOne(req.user?.id);
         if(!user) {
-            this.logger.log(`Unable to upload file; cannot find user ${req.user.id}`);
+            this.logger.error(`Error: Unable to upload file; cannot find user ${req.user.id}`);
             return false; 
         }
         const upload = await this.uploadService.newUpload(user.id, UploadType.Goal, file, id);

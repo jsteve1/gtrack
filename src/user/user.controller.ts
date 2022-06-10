@@ -2,13 +2,15 @@
     2021 Jacob Stevens   
 */
 
-import { Controller, Post, Body, UseGuards, Req, Put, Get, Delete, Logger, Param, Res, Header, Query, Inject, forwardRef } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Req, Put, Get, Delete, Logger, Param, Res } from '@nestjs/common';
 import { CreateUserDto, UpdateUserDto } from '../entities/dto/userDto';
 import JwtRefreshAuthGuard from '../guards/jwt-refresh.auth-guard';
 import { User } from '../entities/user.entity';
 import { UserService } from '../user/user.service';
 import { Response } from 'express';
 import { NewUserAuthGuard } from '../guards/newuser.auth-guard';
+import { ProgressMarker } from '../entities/progressmarker.entity';
+import { Goal } from '../entities/goal.entity';
 
 @Controller('user')
 export class UserController {
@@ -19,13 +21,14 @@ export class UserController {
 
   @Get(':id')
   @UseGuards(JwtRefreshAuthGuard)
-  async getUser(@Req() req: any, @Param('id') userId: string): Promise<User> {
+  async getUser(@Req() req: any, @Res({ passthrough: true }) res: Response, @Param('id') userId: string): Promise<{ user: User, goals: Goal[], progressMarkers: ProgressMarker[] } | string> {
       this.logger.log(`Attemping to fetch user ${userId}`);
       if(!req.user) return null; 
-      if(req.user?.id === userId) return req.user; 
+      if(req.user?.id === userId) return this.userService.getUserProfile(req.user.id); 
       else {
-        this.logger.log(`Error while fetching user with ID: ${userId}, auth mismatch`);
-        return null;
+        this.logger.error(`Error: cannot fetch user with ID: ${userId}, auth mismatch, clearing token from cookie to reset login`);
+        res.clearCookie('Refresh');
+        return `Cannot request user id ${userId} because requester is logged in as user id ${req.user.id}`;
       }
   }
 
@@ -56,15 +59,14 @@ export class UserController {
       return user;
   }
 
-
-  @Delete(':id')
-  @UseGuards(JwtRefreshAuthGuard)
-  async deleteUser(@Req() req, @Param('id') userId: string): Promise<void> {
-    this.logger.log(`Deleting user ${userId}`);
-    //if(req.user.email !== "admin") return null;
-    this.logger.log(`Admin request for delete issued for user with ID: ${userId}`);
-    return this.userService.remove(userId);
-  }
-
-  
+//  Disabling this route for now, don't want anyone to be able to delete their account except admin
+//   @Delete(':id')
+//   @UseGuards(JwtRefreshAuthGuard)
+//   async deleteUser(@Req() req, @Param('id') userId: string): Promise<void> {
+//     this.logger.log(`Deleting user ${userId}`);
+//     //if(req.user.email !== "admin") return null;
+//     this.logger.log(`Admin request for delete issued for user with ID: ${userId}`);
+//     return this.userService.remove(userId);
+//   }
+// }
 }
