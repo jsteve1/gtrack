@@ -21,6 +21,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@nestjs-modules/mailer": "^1.6.1",
     "@nestjs/common": "^7.6.13",
     "@nestjs/config": "^2.1.0",
     "@nestjs/core": "^7.6.13",
@@ -39,7 +40,9 @@
     "class-validator": "^0.13.2",
     "cookie-parser": "^1.4.6",
     "dotenv": "^16.0.1",
+    "handlebars": "^4.7.7",
     "mysql2": "^2.3.3",
+    "nodemailer": "^6.7.5",
     "passport": "^0.5.3",
     "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",
@@ -57,6 +60,7 @@
     "@types/jest": "^26.0.20",
     "@types/multer": "^1.4.7",
     "@types/node": "^14.14.31",
+    "@types/nodemailer": "^6.4.4",
     "@types/supertest": "^2.0.10",
     "@typescript-eslint/eslint-plugin": "^4.15.2",
     "@typescript-eslint/parser": "^4.15.2",
