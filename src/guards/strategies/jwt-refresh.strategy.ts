@@ -27,7 +27,7 @@
      });
    }
 
-   logger = new Logger(JwtRefreshStrategy.name); 
+   private readonly logger = new Logger(JwtRefreshStrategy.name); 
   
    /**
     * Method that performs the validation of the extracted refresh token 
@@ -37,13 +37,20 @@
     */
    async validate(request: Request, payload: any): Promise<any> {
      const refreshToken = request.cookies?.Refresh;
+     const check = await this.userService.checkUserConfirmed(payload.username); 
+     if(check === false) {
+        this.logger.error(`Error: User ${payload.username} is attempting to perform api request hasn't confirmed their account yet`); 
+        return false;
+     }
      const user = await this.userService.checkStoredHashToken(payload.username, refreshToken);
      if(!user){ 
        this.logger.error("Error: JWT validation failed, unauthorized access to api");
        return false;
      }
      delete user.pw; 
+     delete user.confirmationToken; 
      delete user.refreshToken;
+     delete user.resetPwToken;
      request.user = user;
      return user;
    }

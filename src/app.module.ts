@@ -12,16 +12,11 @@ import { join } from 'path';
 import { UploadModule } from './uploads/upload.module';
 import { MediaUpload } from './entities/media-upload.entity';
 import { MulterModule } from '@nestjs/platform-express';
+import { MailModule } from './mail/mail.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [GoalsModule, UserModule,
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'client'),
-      exclude: ['/api*'],
-    }),
-    MulterModule.register({
-      dest: './tmp',
-    }),
+  imports: [
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: `${process.env.DATABASE_URL}`,
@@ -32,8 +27,20 @@ import { MulterModule } from '@nestjs/platform-express';
       entities: [User, Goal, ProgressMarker, MediaUpload],
       synchronize: true,
     }),
+    GoalsModule, UserModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'client'),
+      exclude: ['/api*', '/uploads*'],
+    }),
+    MulterModule.register({
+      dest: './tmp',
+    }),
     SignOnModule,
-    UploadModule
+    UploadModule,
+    MailModule,
+    ConfigModule.forRoot({
+      isGlobal: true
+    })
   ],
   controllers: [],
   providers: [],

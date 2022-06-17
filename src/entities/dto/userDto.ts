@@ -1,5 +1,11 @@
 import { ArrayUnique, IsBoolean, IsEmail, IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID, Matches, Max, MaxLength, maxLength, Min, MinLength } from 'class-validator';
 
+export class NewPasswordDto {
+    @IsNotEmpty({ message: "Password cannot be empty"})
+    @Matches(/((?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%.,]).{8,100})/, {message: "Password must contain at least 1 digit, 1 lowercase letter, 1 uppercase letter, and one special character"})
+    password: string;
+}
+
 export class CreateUserDto {
     @MinLength(1, {
         message: 'First name is too short (minimum 1 characters)',

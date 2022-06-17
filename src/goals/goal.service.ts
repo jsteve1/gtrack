@@ -126,24 +126,24 @@ export class GoalService {
     async removeProgressMarker(markerId: string) {
       this.progressMarkerRepo.delete(markerId); 
     }
-    async addMedia(id: string, path: string): Promise<Goal> {
+    async addMedia(id: string, uploadId: string): Promise<Goal> {
       const goal = await this.goalRepo.findOne(id); 
-      if(goal.media.some(pic => pic === path)) {
-        goal.media = goal.media.filter(pic => pic !== path); 
-        goal.media.push(path); 
+      if(goal.media.some(pic => pic === uploadId)) {
+        goal.media = goal.media.filter(pic => pic !== uploadId); 
+        goal.media.push(uploadId); 
         return this.goalRepo.save(goal); 
       } else {
-        goal.media.push(path); 
+        goal.media.push(uploadId); 
         return this.goalRepo.save(goal); 
       }
     }
-    async rmMedia(id: string, path: string): Promise<Goal> {
+    async rmMedia(id: string, uploadId: string): Promise<Goal> {
       const goal = await this.goalRepo.findOne(id); 
         if(!goal.media.some(pic => pic === goal.mediacomplete)) {
             goal.mediacomplete = "";
         }
         goal.media = goal.media.filter(pic => 
-            pic !== path 
+            pic !== uploadId 
         );
         return this.goalRepo.save(goal); 
     }

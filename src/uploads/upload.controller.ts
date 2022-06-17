@@ -1,4 +1,4 @@
-import { Delete, forwardRef, Inject, Logger, Param, Req, UploadedFile, UseGuards } from "@nestjs/common";
+import { Delete, forwardRef, Get, Inject, Logger, Param, Req, Res, UploadedFile, UseGuards } from "@nestjs/common";
 import { UseInterceptors } from "@nestjs/common";
 import { Post } from "@nestjs/common";
 import { Controller } from "@nestjs/common";
@@ -9,6 +9,8 @@ import JwtRefreshAuthGuard from "../guards/jwt-refresh.auth-guard";
 import { UploadService } from "./upload-file.service";
 import { GoalService } from "src/goals/goal.service";
 import { storage, limits, fileFilter } from "../config/uploads.config";
+import { Response, Request } from 'express';
+import { join } from "path";
 
 @Controller('upload')
 export class UploadController {
@@ -19,8 +21,21 @@ export class UploadController {
                 private goalService: GoalService,
                 private uploadService: UploadService
         ) {}
-
     private readonly logger = new Logger(UploadController.name);
+
+    @Get(':id')
+    @UseGuards(JwtRefreshAuthGuard)
+    async getUpload(@Req() req, @Res() res: Response, @Param('id') id) {
+        const upload = await this.uploadService.findOne(id); 
+        if(upload.userid !== req.user.id) {
+            const user = await this.userService.findOne(upload.userid); 
+            if(user.private === true) {
+                return res.send(`Cannot access media from other user with a private profile`); 
+            }
+        }
+        return res.sendFile(join(__dirname, "..", "..", `${upload.path}`));
+    }
+
     @Post('profile')
     @UseInterceptors(FileInterceptor('file', { storage: storage, limits: limits, fileFilter: fileFilter }))
     @UseGuards(JwtRefreshAuthGuard)
@@ -32,7 +47,11 @@ export class UploadController {
             return false; 
         }
         const upload = await this.uploadService.newUpload(user.id, UploadType.ProfilePic, file);
-        const _user = await this.userService.addMedia(user.id, upload.path);
+        const _user = await this.userService.addMedia(user.id, upload.id);
+        delete _user.refreshToken; 
+        delete _user.pw; 
+        delete _user.resetPwToken; 
+        delete _user.confirmationToken;
         return { upload: upload, user: _user }; 
     }
     @Post('goal/:id')
@@ -47,7 +66,7 @@ export class UploadController {
         }
         const upload = await this.uploadService.newUpload(user.id, UploadType.Goal, file, id);
         const { goal, progressMarkers } = await this.goalService.findOne(id);
-        const _goal = await this.goalService.addMedia(goal.id, upload.path); 
+        const _goal = await this.goalService.addMedia(goal.id, upload.id); 
         return { upload: upload, goal: _goal }; 
     }
     @Delete(':id')

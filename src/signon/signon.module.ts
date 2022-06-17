@@ -6,6 +6,7 @@ import { SignOnStrategy } from '../guards/strategies/signon.strategy';
 import { JwtRefreshStrategy } from '../guards/strategies/jwt-refresh.strategy';
 import { UserModule } from '../user/user.module';
 import { SignonController } from './signon.controller';
+import { MailModule } from '../mail/mail.module';
 
 
 @Module({
@@ -16,6 +17,7 @@ import { SignonController } from './signon.controller';
       secret: process.env.REFRESH_SECRET,
       signOptions: { expiresIn: '900s' },
     }),
+    MailModule
   ],
   controllers: [SignonController],
   providers: [SignOnService, SignOnStrategy, JwtRefreshStrategy],

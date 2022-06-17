@@ -31,5 +31,14 @@ export class User {
 
   @Column()
   bio: string; 
+
+  @Column({ default: false })
+  confirmed: boolean; 
+
+  @Column()
+  confirmationToken: string; 
   
+  @Column()
+  resetPwToken: string;
+
 }

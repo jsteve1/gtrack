@@ -102,10 +102,10 @@ export class UploadService {
         await this.uploadRepo.delete(uploadId);     
         try {
             if(upload.uploadType === UploadType.Goal) {
-                await this.goalService.rmMedia(upload.entityId, upload.path); 
+                await this.goalService.rmMedia(upload.entityId, upload.id); 
             }
             if(upload.uploadType === UploadType.ProfilePic) {
-                await this.userService.rmMedia(upload.entityId, upload.path); 
+                await this.userService.rmMedia(upload.entityId, upload.id); 
             }
             await unlink(upload.path); 
         } catch(err) {

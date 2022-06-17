@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable } from "@nestjs/common";
+import { forwardRef, Inject, Injectable, Logger } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { User } from "../entities/user.entity";
@@ -21,11 +21,13 @@ export class UserService implements OnModuleDestroy {
         private goalService: GoalService
     ) {}
 
+    private readonly logger = new Logger(UserService.name); 
+
     async onModuleDestroy(): Promise<void> {
         console.log("Destroying user service, clearing cache, refresh tokens & location");
         await this.userRepository.update({}, {  refreshToken: '' });
     }
-    async create(userDto: CreateUserDto): Promise<{ user: User, token: string }> {
+    async create(userDto: CreateUserDto, confirmationToken: string): /*Promise<{ user: User, token: string }>*/ Promise<User> {
         if(await this.checkUserExists(userDto.email)) {
             return null;
         }
@@ -36,10 +38,11 @@ export class UserService implements OnModuleDestroy {
         user.private = userDto.private || false; 
         user.bio = userDto.bio || '';
         user.pw = await bcrypt.hash(userDto.pw, 10);
+        user.confirmationToken = confirmationToken; 
         user = await this.userRepository.save(user);
-        const token = await this.signOnService.newRefreshToken(user);
-        user.refreshToken = await bcrypt.hash(token, 10);
-        return { user: user, token: token };
+        //const token = await this.signOnService.newRefreshToken(user);
+        //user.refreshToken = await bcrypt.hash(token, 10);
+        return user;
     }
     async checkUserExists(email: string): Promise<Boolean> {
         const count = (await this.userRepository.count({ where: [ { email: email } ] }));
@@ -53,6 +56,9 @@ export class UserService implements OnModuleDestroy {
             }
         } else return null;
      }
+    async checkUserConfirmed(email: string) {
+      return (await this.findEmail(email)).confirmed; 
+    }
     async findOne(id: string): Promise<User> {
         return this.userRepository.findOne(id); 
     }
@@ -87,31 +93,69 @@ export class UserService implements OnModuleDestroy {
         }
         return this.userRepository.save(user); 
     }
-    async addMedia(id: string, path: string): Promise<User> {
+    async addMedia(id: string, uploadId: string): Promise<User> {
         const user = await this.userRepository.findOne(id); 
-        if(user.pics.some(pic => pic === path)) {
-            user.pics = user.pics.filter(pic => pic !== path);
-            user.pics.push(path);
+        if(user.pics.some(pic => pic === uploadId)) {
+            user.pics = user.pics.filter(pic => pic !== uploadId);
+            user.pics.push(uploadId);
             return this.userRepository.save(user); 
         } else {
-            user.pics.push(path); 
+            user.pics.push(uploadId); 
             return this.userRepository.save(user); 
         }
     }
-    async rmMedia(id: string, path: string): Promise<User> {
+    async rmMedia(id: string, uploadId: string): Promise<User> {
         const user = await this.userRepository.findOne(id); 
-        if(user.mainpic === path) { user.mainpic = "" }; 
+        if(user.mainpic === uploadId) { user.mainpic = "" }; 
         if(!user.pics.some(pic => pic === user.mainpic)) {
             user.mainpic = "";
         }
         user.pics = user.pics.filter(pic => 
-            pic !== path 
+            pic !== uploadId 
         );
         return this.userRepository.save(user); 
     }
     async getUserProfile(id: string): Promise<{ user: User, goals: Array<Goal>, progressMarkers: Array<ProgressMarker>}> {
         const user = await this.userRepository.findOne(id); 
         const { goals, progressMarkers } = await this.goalService.getGoals(user.id); 
+        delete user.pw; 
+        delete user.refreshToken; 
+        delete user.resetPwToken; 
+        delete user.confirmationToken; 
         return { user: user, goals: goals, progressMarkers: progressMarkers }; 
+    }
+
+    async confirmUser(user: User): Promise<User> {
+        user.confirmationToken = ''; 
+        user.confirmed = true; 
+        return this.userRepository.save(user); 
+    }
+
+    async deleteUser(email: string): Promise<boolean> {
+        const user = await this.findEmail(email); 
+        if(user) {
+            await this.userRepository.delete(user); 
+            return true; 
+        }
+        else {
+            return false; 
+        }
+    }
+
+    async pwReset(userId: string, token: string): Promise<User> {
+        const user = await this.findOne(userId); 
+        user.confirmed = false; 
+        user.refreshToken = "";
+        user.pw = ""; 
+        user.resetPwToken = token;
+        return this.userRepository.save(user);
+    }
+
+    async setNewPW(userId: string, newPW: string): Promise<User> {
+        const user = await this.findOne(userId); 
+        user.confirmed = true;
+        user.resetPwToken = ""; 
+        user.pw = await bcrypt.hash(newPW, 10);
+        return this.userRepository.save(user); 
     }
 }
